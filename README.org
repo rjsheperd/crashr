@@ -1,0 +1,42 @@
+#+TITLE: CrashR
+#+AUTHOR: RJ Sheperd
+
+** rfars
+
+*** Mapping Fatal Bike Crashes
+#+BEGIN_SRC R :tangle pedbikecrashes.R
+
+  library(rfars)
+  library(dplyr)
+  library(ggplot2)
+  library(leaflet)
+  library(leaflet.extras)
+  library(htmltools)
+  library(htmlwidgets)
+
+  # myFARS <- get_fars(years = 2016:2021, states = "OR")
+  myFARS <- readRDS("myFARS.rds")
+
+  m = counts(myFARS, 
+	 what = "fatalities", 
+	 involved = "pedbike", 
+	 filterOnly = TRUE
+	 ) %>% 
+    leaflet() %>%
+    addProviderTiles(provider = "OpenStreetMap") %>%
+    addCircleMarkers(
+      radius = 3,
+      color = "red",
+      stroke = TRUE,
+      fillOpacity = 0.7, 
+      group = "Crash Locations",
+      popup = ~ sprintf("
+	      <b>Year:</b> %d <br/>
+	      <b>Fatals:</b> %d <br/>
+	      <b>Hit & Run:</b> %s <br/>
+	      <b>Age:</b> %s <br/>
+	      <b># Peds:</b> %d <br/>", year, fatals, hit_run, age, peds))
+
+  saveWidget(m, file="pedbikecrashes.html")
+
+#+END_SRC
